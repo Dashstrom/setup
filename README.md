@@ -11,7 +11,7 @@ cd dashup
 
 ```sh
 sudo apt -y update && sudo apt -y upgrade
-sudo apt -y install --reinstall git build-essential manpages-dev gdb gcc tree bat unzip p7zip-full p7zip-rar
+sudo apt -y install --reinstall git build-essential manpages-dev gdb gcc tree bat unzip p7zip-full p7zip-rar libimage-exiftool-perl
 ```
 
 ## Update Ubuntu version
@@ -33,7 +33,7 @@ sudo apt install kubuntu-desktop
 ```sh
 sudo apt -y install software-properties-common
 sudo add-apt-repository -y ppa:deadsnakes/ppa
-sudo apt -y install --reinstall python3.10 python3.10-dev python3.10-distutils python3.10-venv python3-cffi libcairo2-dev libgirepository1.0-dev python3-testresources
+sudo apt -y install --reinstall python3.10 python3.10-dev python3.10-distutils python3.10-venv python3-cffi libcairo2-dev libgirepository1.0-dev python3-testresources 
 python3.10 -V
 ```
 
