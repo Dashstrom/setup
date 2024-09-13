@@ -21,15 +21,15 @@ fi
 # Config
 # you can put an ascii art ~/.asciiart 
 
-# don't put duplicate lines or lines starting with space in the history.
-HISTCONTROL=ignoreboth
+# Custom history format.
+HISTTIMEFORMAT="%F %T "
 
 # append to the history file, don't overwrite it
 shopt -s histappend
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=1000
-HISTFILESIZE=2000
+HISTSIZE=2000
+HISTFILESIZE=5000
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -68,6 +68,7 @@ n="\342\224\224"    # └
 p="\342\225\274"    # ╼
 
 # art at login
+# replace with https://github.com/sepandhaghighi/art
 export ART=$(cat <<-END
     ____             __         __                     
    / __ \\____ ______/ /_  _____/ /__________  ____ ___ 
@@ -160,32 +161,11 @@ alias .....='cd ../../../..'
 alias lisp='sbcl --script'
 alias ilisp='sbcl'
 
-# Python alias
-alias pipupall='pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1  | xargs -n1 pip install -U'
-
 # Tools alias
 alias bfg='java -jar ~/bin/bfg/bfg.jar'
 alias bat='batcat'
 alias ghidra='~/bin/ghidra/ghidraRun &'
-
-# resolve lastest python
-maxversion="0"
-for version in $(/bin/ls /usr/bin/python3.* | /bin/egrep -o '[0-9][0-9]?$')
-do
-    if [ "$maxversion" -lt "$version" ]; then
-        maxversion="$version"
-    fi
-done
-if [ "$maxversion" -eq "0" ]; then
-    if command -v python3 &> /dev/null; then 
-        alias py='python3'
-    else
-        alias py='python'
-    fi
-else
-    alias py="/usr/bin/python3.$maxversion"
-fi
-unset maxversion
+alias py='python3'
 
 # Bat theme
 export BAT_THEME="Monokai Extended"
@@ -197,61 +177,15 @@ export BAT_THEME="Monokai Extended"
 #                                                                       #
 #-----------------------------------------------------------------------#
 
-# upgrade many thing
-update() {
-    _update() {
-        printbar; echo "Update system ..."; printbar
-        sudo apt -y update
-        printbar; echo "Upgrade system ..."; printbar
-        sudo apt -y upgrade
-        printbar; echo "Upgrade pip ..."; printbar
-        pip install -U pip
-        printbar
-        echo "Done !"
-    }
-    time _update
-}
-
 # clean way to print 
 env() {
     $(which env) $@ | escapecolor
-}
-
-# compile asm code
-asm() {
-    if [ $# -ne 1 ]; then
-        echo "SYNTAXE : $0 OUTPUT"
-    fi
-    src="$1"
-    name="$(basename ${src%.*})"
-    gcc -c -gdwarf "$src" -o "$name.o" && ld -s -o "$name" "$name.o" && "./$name"
-    rm -rf "$name.o"
 }
 
 # clean way to print 
 printenv() {
     $(which printenv) $@ | escapecolor
 }
-
-# restart kde gui
-rkde() {
-    if command -v plasmashell &> /dev/null; then
-        export DISPLAY=:0
-        echo "[+] kquitapp5 plasmashell"
-        DISPLAY=:0 kquitapp5 plasmashell &> /dev/null
-        echo "[+] killall plasmashell"
-        DISPLAY=:0 killall plasmashell &> /dev/null
-        echo "[+] sleep 2 sec ..."
-        sleep 2
-        echo "[+] kstart5 plasmashell"
-        DISPLAY=:0 kstart5 plasmashell &> /dev/null
-        sleep 3
-        echo "Done !"
-    else 
-        echo "Not supported"
-    fi
-}
-
 
 # run jupyter-notebook
 jpy() {
@@ -405,297 +339,6 @@ printbar() {
     echo "$bar"
     return 0
 }
-
-# Compile and run c programs
-toc() {
-    # Missing positional argument
-    if [ "$#" -eq 0 ]; then
-        path="$PWD"
-    elif [ "$#" -eq 1 ]; then
-        path=$(realpath "$1")
-        if [ $? -ne 0 ]; then
-            echo "Invalid path"
-            return 1
-        fi
-    else
-        echo "SYNTAXE $0 [OPTINAL PATH]"
-        return 1
-    fi
-
-    if [ -d "$path" ]; then
-        echo "Recursive toc : $path"
-        err=0
-        underpaths=$(ls -d -1 "$path/"* 2> /dev/null)
-        if [ $? -ne 0 ]; then
-            return 2
-        fi
-
-        for underpath in $underpaths; do
-            if [[ -f "$underpath" ]] && [[ $underpath == *".c" ]] || [ -d "$underpath" ]; then
-                toc "$underpath"
-                exittoc=$?
-                if [ $exittoc -ne 0 ]; then
-                    err=2
-                fi
-            fi
-        done
-        return $err
-    elif [ ! -f "$path" ]; then
-        echo "Not a File"
-        return 3
-    elif [[ $path != *".c" ]]; then
-        echo "Not a C file"
-        return 4
-    fi
-
-    # Show informations
-    echo "Input : $path"
-
-    name="$(basename ${path%.*})"
-    dirname=${path%/*}
-    mkdir -p -- "$dirname/out/"
-    outpath="$dirname/out/$name"
-    echo "Output : $outpath"
-
-    chars=$(wc -c $path)
-    chars=${chars% *}
-    echo "Compiling $chars bytes ..."
-
-    # GCC FLAGS
-    # -Wredundant-decls         duplicate statement.
-    # -Wformat-security         wrong format function.
-    # -Wformat-signedness       wrong format function about the sign.
-    # -Werror                   Make all warnings into errors.
-    # -Wextra                   Add more warning
-    # -Wall                     Add more Warning
-    # -Wshadow                  Warning already defined var
-    # -Wdouble-promotion        Warning implicit cast of float to double
-    # -Wfloat-equal             Warning on float comparaison
-    # -Wpedantic                Add warnings
-    # -pedantic-errors          Add errors
-    # -fverbose-asm             Add source message to file for gdb
-    # -gdwarf                   Add source to out file for debug for gdb
-    # -fsanitize=leak           Show memory leak
-    # -fno-stack-protector      Remove stack protector
-    # -O0                       Remove optimization
-
-    # Compilation
-    gcc "$path" -o "$outpath"  \
-        -Wredundant-decls      \
-        -Wformat-security      \
-        -Wformat-signedness    \
-        -Wextra                \
-        -O0                    \
-        -Wall                  \
-        -Wshadow               \
-        -Wdouble-promotion     \
-        -Wfloat-equal          \
-        -Wpedantic             \
-        -pedantic-errors       \
-        -fverbose-asm          \
-        -gdwarf                \
-        -fsanitize=leak        \
-    && 
-
-    exitgcc="$?"
-    if [ $exitgcc -ne 0 ]; then
-        echo "GCC exit code was $exitgcc"
-        return 5
-    fi
-
-    # Run program
-    chars=$(wc -c $outpath)
-    chars=${chars% *}
-    echo "Compiled into $chars bytes ..."
-    echo "Running ..."
-    printbar
-    
-    # run program
-    $outpath
-    exitexec="$?"
-
-    # Check exit code
-    if [ $exitexec -eq 0 ]; then
-        printbar
-        return 0
-    fi
-
-    echo
-    printbar
-
-    if [ $exitexec -gt 128 ]; then
-        # Show informations about exit code
-        echo "Process was terminated abnormally"
-        val=$(($exitexec-128))
-        case $val in
-            2) echo "SIGINT : Interrupt from the keyboard." ;;
-            3) echo "SIGQUIT : Request 'Exit' from the keyboard." ;;
-            4) echo "SIGILL : Illegal instruction." ;;
-            5) echo "SIGTRAP : Breakpoint encountered." ;;
-            6) echo "SIGABRT : Stop signal from abort." ;;
-            8) echo "SIGFPE : Floating point math error." ;;
-            9) echo "SIGKILL : Signal 'KILL'." ;;
-            11) echo "SIGSEGV : Invalid memory reference." ;;
-            20) echo "SIGTSTP : CTRL + Z." ;;
-            *) echo "Unknow signal $val" ;;
-        esac
-        printbar
-        return 6
-
-    else
-        echo "Program exit code $exitexec"
-        printbar
-        return 7
-    fi
-}
-
-errgrep() {
-    errno_txt=$(cat <<EOF
-  1   EPERM             Operation not permitted
-  2   ENOENT            No such file or directory
-  3   ESRCH             No such process
-  4   EINTR             Interrupted system call
-  5   EIO               Input/output error
-  6   ENXIO             No such device or address
-  7   E2BIG             Argument list too long
-  8   ENOEXEC           Exec format error
-  9   EBADF             Bad file descriptor
- 10   ECHILD            No child processes
- 11   EAGAIN            Resource temporarily unavailable
- 11   EWOULDBLOCK       Resource temporarily unavailable
- 12   ENOMEM            Cannot allocate memory
- 13   EACCES            Permission denied
- 14   EFAULT            Bad address
- 15   ENOTBLK           Block device required
- 16   EBUSY             Device or resource busy
- 17   EEXIST            File exists
- 18   EXDEV             Invalid cross-device link
- 19   ENODEV            No such device
- 20   ENOTDIR           Not a directory
- 21   EISDIR            Is a directory
- 22   EINVAL            Invalid argument
- 23   ENFILE            Too many open files in system
- 24   EMFILE            Too many open files
- 25   ENOTTY            Inappropriate ioctl for device
- 26   ETXTBSY           Text file busy
- 27   EFBIG             File too large
- 28   ENOSPC            No space left on device
- 29   ESPIPE            Illegal seek
- 30   EROFS             Read-only file system
- 31   EMLINK            Too many links
- 32   EPIPE             Broken pipe
- 33   EDOM              Numerical argument out of domain
- 34   ERANGE            Numerical result out of range
- 35   EDEADLK           Resource deadlock avoided
- 35   EDEADLOCK         Resource deadlock avoided
- 36   ENAMETOOLONG      File name too long
- 37   ENOLCK            No locks available
- 38   ENOSYS            Function not implemented
- 39   ENOTEMPTY         Directory not empty
- 40   ELOOP             Too many levels of symbolic links
- 42   ENOMSG            No message of desired type
- 43   EIDRM             Identifier removed
- 44   ECHRNG            Channel number out of range
- 45   EL2NSYNC          Level 2 not synchronized
- 46   EL3HLT            Level 3 halted
- 47   EL3RST            Level 3 reset
- 48   ELNRNG            Link number out of range
- 49   EUNATCH           Protocol driver not attached
- 50   ENOCSI            No CSI structure available
- 51   EL2HLT            Level 2 halted
- 52   EBADE             Invalid exchange
- 53   EBADR             Invalid request descriptor
- 54   EXFULL            Exchange full
- 55   ENOANO            No anode
- 56   EBADRQC           Invalid request code
- 57   EBADSLT           Invalid slot
- 59   EBFONT            Bad font file format
- 60   ENOSTR            Device not a stream
- 61   ENODATA           No data available
- 62   ETIME             Timer expired
- 63   ENOSR             Out of streams resources
- 64   ENONET            Machine is not on the network
- 65   ENOPKG            Package not installed
- 66   EREMOTE           Object is remote
- 67   ENOLINK           Link has been severed
- 68   EADV              Advertise error
- 69   ESRMNT            Srmount error
- 70   ECOMM             Communication error on send
- 71   EPROTO            Protocol error
- 72   EMULTIHOP         Multihop attempted
- 73   EDOTDOT           RFS specific error
- 74   EBADMSG           Bad message
- 75   EOVERFLOW         Value too large for defined data type
- 76   ENOTUNIQ          Name not unique on network
- 77   EBADFD            File descriptor in bad state
- 78   EREMCHG           Remote address changed
- 79   ELIBACC           Can not access a needed shared library
- 80   ELIBBAD           Accessing a corrupted shared library
- 81   ELIBSCN           .lib section in a.out corrupted
- 82   ELIBMAX           Attempting to link in too many shared libraries
- 83   ELIBEXEC          Cannot exec a shared library directly
- 84   EILSEQ            Invalid or incomplete multibyte or wide character
- 85   ERESTART          Interrupted system call should be restarted
- 86   ESTRPIPE          Streams pipe error
- 87   EUSERS            Too many users
- 88   ENOTSOCK          Socket operation on non-socket
- 89   EDESTADDRREQ      Destination address required
- 90   EMSGSIZE          Message too long
- 91   EPROTOTYPE        Protocol wrong type for socket
- 92   ENOPROTOOPT       Protocol not available
- 93   EPROTONOSUPPORT   Protocol not supported
- 94   ESOCKTNOSUPPORT   Socket type not supported
- 95   ENOTSUP           Operation not supported
- 95   EOPNOTSUPP        Operation not supported
- 96   EPFNOSUPPORT      Protocol family not supported
- 97   EAFNOSUPPORT      Address family not supported by protocol
- 98   EADDRINUSE        Address already in use
- 99   EADDRNOTAVAIL     Cannot assign requested address
-100   ENETDOWN          Network is down
-101   ENETUNREACH       Network is unreachable
-102   ENETRESET         Network dropped connection on reset
-103   ECONNABORTED      Software caused connection abort
-104   ECONNRESET        Connection reset by peer
-105   ENOBUFS           No buffer space available
-106   EISCONN           Transport endpoint is already connected
-107   ENOTCONN          Transport endpoint is not connected
-108   ESHUTDOWN         Cannot send after transport endpoint shutdown
-109   ETOOMANYREFS      Too many references: cannot splice
-110   ETIMEDOUT         Connection timed out
-111   ECONNREFUSED      Connection refused
-112   EHOSTDOWN         Host is down
-113   EHOSTUNREACH      No route to host
-114   EALREADY          Operation already in progress
-115   EINPROGRESS       Operation now in progress
-116   ESTALE            Stale file handle
-117   EUCLEAN           Structure needs cleaning
-118   ENOTNAM           Not a XENIX named type file
-119   ENAVAIL           No XENIX semaphores available
-120   EISNAM            Is a named type file
-121   EREMOTEIO         Remote I/O error
-122   EDQUOT            Disk quota exceeded
-123   ENOMEDIUM         No medium found
-124   EMEDIUMTYPE       Wrong medium type
-125   ECANCELED         Operation canceled
-126   ENOKEY            Required key not available
-127   EKEYEXPIRED       Key has expired
-128   EKEYREVOKED       Key has been revoked
-129   EKEYREJECTED      Key was rejected by service
-130   EOWNERDEAD        Owner died
-131   ENOTRECOVERABLE   State not recoverable
-132   ERFKILL           Operation not possible due to RF-kill
-133   EHWPOISON         Memory page has hardware error
-EOF
-)
-    if [ $# -eq 0 ]; then
-        echo "$errno_txt"
-    else
-        echo "$errno_txt" | grep "$@"
-    fi
-
-    return 0
-}
-
 
 #-----------------------------------------------------------------------#
 #                                                                       #
