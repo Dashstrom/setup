@@ -68,16 +68,7 @@ n="\342\224\224"    # └
 p="\342\225\274"    # ╼
 
 # art at login
-# replace with https://github.com/sepandhaghighi/art
-export ART=$(cat <<-END
-    ____             __         __                     
-   / __ \\____ ______/ /_  _____/ /__________  ____ ___ 
-  / / / / __ \`/ ___/ __ \\/ ___/ __/ ___/ __ \\/ __ \`__ \\ 
- / /_/ / /_/ (__  ) / / (__  ) /_/ /  / /_/ / / / / / /
-/_____/\\__,_/____/_/ /_/____/\\__/_/   \\____/_/ /_/ /_/ 
- 
-END
-)
+export ART="$(cat ~/.local/etc/art/art.txt 2> /dev/null)"
 
 # only available for colorful terminal
 if [ "$use_color" = true ]; then
@@ -162,9 +153,8 @@ alias lisp='sbcl --script'
 alias ilisp='sbcl'
 
 # Tools alias
-alias bfg='java -jar ~/bin/bfg/bfg.jar'
+alias bfg='java -jar ~/.local/bin/bfg/bfg.jar'
 alias bat='batcat'
-alias ghidra='~/bin/ghidra/ghidraRun &'
 alias py='python3'
 
 # Bat theme
