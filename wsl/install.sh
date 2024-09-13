@@ -42,7 +42,8 @@ apt -y install \
     pipenv \
     python3-pip \
     openjdk-17-jdk \
-    pipx
+    pipx \
+    gh
 
 
 ## Install .bashrc
@@ -80,3 +81,6 @@ user 'rm ~/.local/bin/ghidra/ghidra.tar.gz'
 
 ## Complete your installation
 apt autoremove
+
+# Login to github
+gh auth login
