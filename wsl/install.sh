@@ -71,7 +71,7 @@ user 'curl -o ~/.local/bin/bfg/bfg.jar https://repo1.maven.org/maven2/com/madgag
 ## Install GDB peda
 user 'mkdir -p ~/.local/bin/peda'
 user 'git clone https://github.com/longld/peda.git ~/.local/bin/peda'
-user 'echo "source ~/bin/peda/peda.py" >> ~/.gdbinit'
+user 'echo "source ~/.local/bin/peda/peda.py" >> ~/.gdbinit'
 
 ## Install Ghidra
 user 'mkdir -p ~/.local/bin/ghidra'
