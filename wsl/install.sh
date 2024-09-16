@@ -52,6 +52,9 @@ user 'curl -o ~/.bashrc https://raw.githubusercontent.com/Dashstrom/setup/HEAD/w
 # Install basic setup for python
 sudo apt install pipx
 
+# Fix missing package disutils
+user 'python3 -m pip install --upgrade setuptools'
+
 # Install python app
 user 'pipx ensurepath'
 user 'pipx install poetry'
