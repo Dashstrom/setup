@@ -31,6 +31,7 @@ apt -y install \
     p7zip-full \
     p7zip-rar \
     jq \
+    patchelf \
     libimage-exiftool-perl \
     python3-dbg \
     python3-dev \
@@ -42,17 +43,18 @@ apt -y install \
     pipenv \
     python3-pip \
     openjdk-17-jdk \
+    cmake \
+    liblzma-dev \
     pipx \
     gh
-
 
 ## Install .bashrc
 user 'curl -o ~/.bashrc https://raw.githubusercontent.com/Dashstrom/setup/HEAD/wsl/.bashrc'
 
-# Install basic setup for python
+# Install pipx for isolated install in python
 sudo apt install pipx
 
-# Fix missing package disutils
+# Fix missing package disutils (removed in 3.12)
 user 'python3 -m pip install --upgrade setuptools'
 
 # Install python app
@@ -63,7 +65,13 @@ user 'pipx install pipenv'
 user 'pipx install virtualenv'
 user 'pipx install art'
 
-## Create aski art
+## Install Rust and cargo
+curl https://sh.rustup.rs -sSf | sh
+
+## Install pwninit
+cargo install pwninit
+
+## Create ascii art
 user 'mkdir -p ~/.local/etc/art'
 user 'cd ~/.local/etc/art; art save "$USER" small'
 
