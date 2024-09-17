@@ -156,6 +156,7 @@ alias ilisp='sbcl'
 alias bfg='java -jar ~/.local/bin/bfg/bfg.jar'
 alias bat='batcat'
 alias py='python3'
+alias doldrums='~/.local/etc/doldrums/venv/bin/python3 ~/.local/etc/doldrums/src/main.py'
 
 # Bat theme
 export BAT_THEME="Monokai Extended"
