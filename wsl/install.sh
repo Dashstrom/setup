@@ -104,6 +104,14 @@ user 'curl -o ~/.local/bin/ghidra/ghidra.tar.gz https://codeload.github.com/Nati
 user 'tar xvf ~/.local/bin/ghidra/ghidra.tar.gz -C ~/.local/bin/ghidra'
 user 'rm ~/.local/bin/ghidra/ghidra.tar.gz'
 
+# Install gdre
+user 'mkdir -p ~/.local/etc/gdre'
+user 'wget -O ~/.local/etc/gdre/gdre.zip https://github.com/bruvzg/gdsdecomp/releases/download/v0.6.2/GDRE_tools-v0.6.2-linux.zip'
+user 'unzip ~/.local/etc/gdre/gdre.zip -d ~/.local/etc/gdre'
+user 'rm ~/.local/etc/gdre/gdre.zip'
+user 'chmod +x ~/.local/etc/gdre/gdre_tools.x86_64'
+user 'ln -s ~/.local/etc/gdre/gdre_tools.x86_64 ~/.local/bin/gdre'
+
 # Complete your installation
 apt autoremove
 
