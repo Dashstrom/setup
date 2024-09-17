@@ -65,6 +65,11 @@ user 'pipx install cookiecutter'
 user 'pipx install pipenv'
 user 'pipx install virtualenv'
 user 'pipx install art'
+user 'pipx install mypy'
+user 'pipx install ruff'
+user 'pipx install pre-commit'
+user 'pipx install commitizen'
+
 
 ## Install Rust and cargo
 curl https://sh.rustup.rs -sSf | sh
@@ -84,6 +89,12 @@ user 'curl -o ~/.local/bin/bfg/bfg.jar https://repo1.maven.org/maven2/com/madgag
 user 'mkdir -p ~/.local/bin/peda'
 user 'git clone https://github.com/longld/peda.git ~/.local/bin/peda'
 user 'echo "source ~/.local/bin/peda/peda.py" >> ~/.gdbinit'
+
+## Install Ghidra
+user 'mkdir -p ~/.local/bin/ghidra'
+user 'curl -o ~/.local/bin/ghidra/ghidra.tar.gz https://codeload.github.com/NationalSecurityAgency/ghidra/tar.gz/refs/tags/Ghidra_11.1.2_build'
+user 'tar xvf ~/.local/bin/ghidra/ghidra.tar.gz -C ~/.local/bin/ghidra'
+user 'rm ~/.local/bin/ghidra/ghidra.tar.gz'
 
 ## Install Ghidra
 user 'mkdir -p ~/.local/bin/ghidra'
