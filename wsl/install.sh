@@ -49,7 +49,10 @@ apt -y install \
     apktool \
     gh
 
-## Install .bashrc
+# Add autoamtic resolution of JAVA_HOME
+echo -e '\nexport JAVA_HOME="$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")"\n' >> /etc/profile
+
+# Install .bashrc
 user 'curl -o ~/.bashrc https://raw.githubusercontent.com/Dashstrom/setup/HEAD/wsl/.bashrc'
 
 # Install pipx for isolated install in python
@@ -70,39 +73,38 @@ user 'pipx install ruff'
 user 'pipx install pre-commit'
 user 'pipx install commitizen'
 
-
-## Install Rust and cargo
+# Install Rust and cargo
 curl https://sh.rustup.rs -sSf | sh
 
-## Install pwninit
+# Install pwninit
 cargo install pwninit
 
-## Create ascii art
+# Create ascii art
 user 'mkdir -p ~/.local/etc/art'
 user 'cd ~/.local/etc/art; art save "$USER" small'
 
-## Install BFG Repo Cleaner
+# Install BFG Repo Cleaner
 user 'mkdir -p ~/.local/bin/bfg'
 user 'curl -o ~/.local/bin/bfg/bfg.jar https://repo1.maven.org/maven2/com/madgag/bfg/1.14.0/bfg-1.14.0.jar'
 
-## Install GDB peda
+# Install GDB peda
 user 'mkdir -p ~/.local/bin/peda'
 user 'git clone https://github.com/longld/peda.git ~/.local/bin/peda'
 user 'echo "source ~/.local/bin/peda/peda.py" >> ~/.gdbinit'
 
-## Install Ghidra
+# Install Ghidra
 user 'mkdir -p ~/.local/bin/ghidra'
 user 'curl -o ~/.local/bin/ghidra/ghidra.tar.gz https://codeload.github.com/NationalSecurityAgency/ghidra/tar.gz/refs/tags/Ghidra_11.1.2_build'
 user 'tar xvf ~/.local/bin/ghidra/ghidra.tar.gz -C ~/.local/bin/ghidra'
 user 'rm ~/.local/bin/ghidra/ghidra.tar.gz'
 
-## Install Ghidra
+# Install Ghidra
 user 'mkdir -p ~/.local/bin/ghidra'
 user 'curl -o ~/.local/bin/ghidra/ghidra.tar.gz https://codeload.github.com/NationalSecurityAgency/ghidra/tar.gz/refs/tags/Ghidra_11.1.2_build'
 user 'tar xvf ~/.local/bin/ghidra/ghidra.tar.gz -C ~/.local/bin/ghidra'
 user 'rm ~/.local/bin/ghidra/ghidra.tar.gz'
 
-## Complete your installation
+# Complete your installation
 apt autoremove
 
 # Login to github
