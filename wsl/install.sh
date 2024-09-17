@@ -112,6 +112,12 @@ user 'rm ~/.local/etc/gdre/gdre.zip'
 user 'chmod +x ~/.local/etc/gdre/gdre_tools.x86_64'
 user 'ln -s ~/.local/etc/gdre/gdre_tools.x86_64 ~/.local/bin/gdre'
 
+# Install Doldrums
+user 'mkdir -p ~/.local/etc/doldrums'
+user 'git clone https://github.com/rscloura/Doldrums ~/.local/etc/doldrums'
+user 'python3 -m venv ~/.local/etc/doldrums/venv'
+user '~/.local/etc/doldrums/venv/bin/pip3 install pyelftools'
+
 # Complete your installation
 apt autoremove
 
