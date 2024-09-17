@@ -46,6 +46,7 @@ apt -y install \
     cmake \
     liblzma-dev \
     pipx \
+    apktool \
     gh
 
 ## Install .bashrc
