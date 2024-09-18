@@ -47,6 +47,8 @@ apt -y install \
     liblzma-dev \
     pipx \
     apktool \
+    inotify-tools \
+    dos2unix \
     gh
 
 # Add autoamtic resolution of JAVA_HOME
